@@ -354,30 +354,26 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
                 with async_timeout.timeout(15):
                     r = await session.get(url, headers=_send_find_device_command_header)
                 if r.status == 200:
-                    _LOGGER.debug("get_device_location_data: %s", json.loads(await r.text()))
+                    _LOGGER.warn("get_device_location_data: %s", json.loads(await r.text()))
+
                     if "receipt" in json.loads(await r.text())['data']['location']:
+                        gpsInfoTransformed = json.loads(await r.text())['data']['location']['receipt']['gpsInfoTransformed']
+
                         device_info = {}
                         location_info_json = {}
-                        if self._coordinate_type == "baidu":
+                        if self._coordinate_type == "original":
                             location_info_json = json.loads(await r.text())['data']['location']['receipt']['gpsInfo']
-                        elif self._coordinate_type == "google":
-                            location_info_json = json.loads(await r.text())['data']['location']['receipt']['gpsInfoExtra'][0]
-                        elif self._coordinate_type == "original":
-                            gpsInfoExtra = json.loads(await r.text())['data']['location']['receipt']['gpsInfoExtra']
-                            if(len(gpsInfoExtra)>1):
-                                location_info_json = json.loads(await r.text())['data']['location']['receipt']['gpsInfoExtra'][1]
-                            else:
-                                wgs84 = self.GCJ2WGS(gpsInfoExtra[0]['longitude'],gpsInfoExtra[0]['latitude'])
-                                _LOGGER.debug("get_device_location_data_wgs84: %s", wgs84)
-                                location_info_json = {
-                                    "accuracy":int(gpsInfoExtra[0]['accuracy']),
-                                    "coordinateType":'wgs84',
-                                    "latitude":wgs84[1],
-                                    "longitude":wgs84[0],
-                                }
+                            # wgs84 = self.GCJ2WGS(gpsInfoExtra[0]['longitude'],gpsInfoExtra[0]['latitude'])
+                            # _LOGGER.debug("get_device_location_data_wgs84: %s", wgs84)
+                            # location_info_json = {
+                            #     "accuracy":int(gpsInfoExtra[0]['accuracy']),
+                            #     "coordinateType":'wgs84',
+                            #     "latitude":wgs84[1],
+                            #     "longitude":wgs84[0],
+                            # }                            
                         else:
-                            location_info_json = json.loads(await r.text())['data']['location']['receipt']['gpsInfo']
-                        
+                            location_info_json = next((item for item in gpsInfoTransformed if item.get('coordinateType') == self._coordinate_type), None)
+
                         device_info["device_lat"] = location_info_json['latitude']
                         device_info["device_accuracy"] = int(location_info_json['accuracy'])
                         device_info["device_lon"] = location_info_json['longitude']
@@ -400,7 +396,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
                     self.login_result = False
             except BaseException as e:
                 self.login_result = False
-                _LOGGER.warning(e)
+                _LOGGER.error(e)
         return devices_info
     def GCJ2WGS(self,lon,lat):
         a = 6378245.0 # 克拉索夫斯基椭球参数长半轴a
