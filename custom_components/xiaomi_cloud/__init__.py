@@ -146,7 +146,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         pattern = re.compile(r'_sign=(.*?)&')
         
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=self._headers)
             self._cookies['pass_trace'] = r.history[0].headers.getall('Set-Cookie')[2].split(";")[0].split("=")[1]
             _LOGGER.debug("--2---%s",parse.unquote(pattern.findall(r.history[0].headers.getall('Location')[0])[0]))
@@ -179,7 +179,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
                 auth_post_data['captCode'] = captCode
                 self._headers['Cookie'] = self._headers['Cookie'] + \
                                           '; ick={}'.format(self._cookies['ick'])
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.post(url, headers=self._headers, data=auth_post_data, cookies=self._cookies)
             self._cookies['pwdToken'] = r.cookies.get('passToken').value
             self._serviceLoginAuth2_json = json.loads((await r.text())[11:])
@@ -198,7 +198,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         url = self._serviceLoginAuth2_json['location'] + \
               "&clientSign=" + parse.quote(base64_serviceToken.decode())
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=loginmiai_header)
             if r.status == 200:
                 self._Service_Token = r.cookies.get('serviceToken').value
@@ -216,7 +216,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         get_device_list_header = {'Cookie': 'userId={};serviceToken={}'.format(
             self.userId, self._Service_Token)}
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=get_device_list_header)
             if r.status == 200:
                 data = json.loads(await
@@ -241,7 +241,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             data = {'userId': self.userId, 'imei': imei,
                     'auto': 'false', 'channel': 'web', 'serviceToken': self._Service_Token}
             try:
-                with async_timeout.timeout(15, loop=self.hass.loop):
+                with async_timeout.timeout(15):
                     r = await session.post(url, headers=_send_find_device_command_header, data=data)
                 _LOGGER.debug("find_device res: %s", await r.json())
                 if r.status == 200:
@@ -265,7 +265,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         data = {'userId': self.userId, 'imei': imei,
                 'auto': 'false', 'channel': 'web', 'serviceToken': self._Service_Token}
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.post(url, headers=_send_noise_command_header, data=data)
             _LOGGER.debug("noise res: %s", await r.json())
             if r.status == 200:
@@ -295,7 +295,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         data = {'userId': self.userId, 'imei': imei,
                 'deleteCard': 'false', 'channel': 'web', 'serviceToken': self._Service_Token, 'onlineNotify': onlinenotify, 'message':json.dumps(message)}
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.post(url, headers=_send_lost_command_header, data=data)
             _LOGGER.debug("lost res: %s", await r.json())    
             if r.status == 200:
@@ -319,7 +319,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             'Cookie': 'userId={};serviceToken={}'.format(self.userId, self._Service_Token)}
         data = {'text': text, 'serviceToken': self._Service_Token}
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.post(url, headers=_send_clipboard_command_header, data=data)
             _LOGGER.debug("clipboard res: %s", await r.json())    
             if r.status == 200:
@@ -351,7 +351,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             _send_find_device_command_header = {
                 'Cookie': 'userId={};serviceToken={}'.format(self.userId, self._Service_Token)}
             try:
-                with async_timeout.timeout(15, loop=self.hass.loop):
+                with async_timeout.timeout(15):
                     r = await session.get(url, headers=_send_find_device_command_header)
                 if r.status == 200:
                     _LOGGER.debug("get_device_location_data: %s", json.loads(await r.text()))
