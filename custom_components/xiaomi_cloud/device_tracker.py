@@ -17,6 +17,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.device_registry import DeviceEntryType
 
 from .const import (
     DOMAIN,
@@ -113,6 +114,7 @@ class XiaomiDeviceEntity(TrackerEntity, RestoreEntity, Entity):
     def unique_id(self):
         """Return the unique ID."""
         return self._unique_id
+    
     @property
     def device_info(self):
         """Return the device info."""
@@ -120,10 +122,11 @@ class XiaomiDeviceEntity(TrackerEntity, RestoreEntity, Entity):
             "identifiers": {(DOMAIN, self._unique_id)},
             "name": self._name,
             "manufacturer": "Xiaomi",
-            "entry_type": "device",
+            "entry_type": DeviceEntryType.DEVICE, 
             "sw_version": self.sw_version,
             "model": self._name
         }
+
 
     @property
     def should_poll(self):
