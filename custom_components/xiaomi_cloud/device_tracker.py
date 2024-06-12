@@ -122,7 +122,7 @@ class XiaomiDeviceEntity(TrackerEntity, RestoreEntity, Entity):
             "identifiers": {(DOMAIN, self._unique_id)},
             "name": self._name,
             "manufacturer": "Xiaomi",
-            "entry_type": DeviceEntryType.DEVICE, 
+            "entry_type": DeviceEntryType.SERVICE, 
             "sw_version": self.sw_version,
             "model": self._name
         }
