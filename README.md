@@ -15,6 +15,18 @@
 提供`device_tracker`用来定位设备
 可以提供锁机, 响铃, 云剪贴板这些服务
 
+## 快速上手
+使用HACS安装，添加自定义储存库
+![image](https://github.com/lyj0309/xiaomi-cloud/assets/50474995/e7c7fe13-db12-4167-9902-4864ce971261)
+重启ha
+在配置-集成里面添加账号
+![image](https://github.com/lyj0309/xiaomi-cloud/assets/50474995/2707f594-9af0-4b83-a4b5-111d7d9ab1c4)
+
+稍等片刻，即可获取手机信息
+
+## 添加至地图（可选
+地图，编辑，添加实体，即可把手机添加进去
+
 ## 更新
 
 + ### v1.0
@@ -50,9 +62,7 @@
 + ### v1.2.7
   + 修复配置页面无法登录的问题
     
-## 安装配置
 
-建议使用HACS安装,在配置-集成里面添加和设置
 
 ## 服务
 
@@ -87,3 +97,6 @@
 |`phone`   | 必须 | 锁定设备屏幕上显示的手机号码|
 |`onlinenotify`   | 必须 | 定位到丢失设备时，是否短信通知上面号码|
 
+## 感谢
+https://github.com/rslywhj/xiaomi-cloud
+https://github.com/fineemb/xiaomi-cloud
