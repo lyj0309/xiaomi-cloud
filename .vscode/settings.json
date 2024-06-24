@@ -16,5 +16,11 @@
             "command": "extension.execute",
             "priority": 4
         }
+    ],
+    "python.autoComplete.extraPaths": [
+        "/home/codespace/.vscode-remote/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/codespace/.vscode-remote/extensions/rt-thread.rt-thread-micropython-1.0.11/microExamples/code-completion"
     ]
 }

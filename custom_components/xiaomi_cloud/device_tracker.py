@@ -2,20 +2,10 @@
 """Support for the Xiaomi device tracking."""
 import logging
 
-
-from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
+from homeassistant.components.device_tracker.config_entry import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
-from homeassistant.const import (
-    ATTR_BATTERY_LEVEL,
-    ATTR_GPS_ACCURACY,
-    ATTR_LATITUDE,
-    ATTR_LONGITUDE,
-)
-from homeassistant.core import callback
-from homeassistant.helpers import device_registry
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.device_registry import DeviceEntryType
 
@@ -28,14 +18,14 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistantType, config_entry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
     """Configure a dispatcher connection based on a config entry."""
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
     devices = []
     for i in range(len(coordinator.data)):
         devices.append(XiaomiDeviceEntity(hass, coordinator, i))
-        # _LOGGER.debug("device is : %s", i)
+        _LOGGER.debug("device is : %s", i)
     async_add_entities(devices, True)
 
 class XiaomiDeviceEntity(TrackerEntity, RestoreEntity, Entity):
@@ -136,7 +126,7 @@ class XiaomiDeviceEntity(TrackerEntity, RestoreEntity, Entity):
     @property
     def source_type(self):
         """Return the source type, eg gps or router, of the device."""
-        return SOURCE_TYPE_GPS
+        return SourceType.GPS
 
         
 

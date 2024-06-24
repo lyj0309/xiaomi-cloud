@@ -14,6 +14,7 @@ import base64
 import hashlib
 import math
 from urllib import parse
+import aiohttp
 import async_timeout
 from aiohttp.client_exceptions import ClientConnectorError
 from homeassistant.core import Config, HomeAssistant
@@ -203,6 +204,8 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             if r.status == 200:
                 self._Service_Token = r.cookies.get('serviceToken').value
                 self.userId = r.cookies.get('userId').value
+                _LOGGER.debug("_login_miai",url,"userid",self.userId)
+
                 return True
             else:
                 return False
@@ -219,8 +222,8 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             with async_timeout.timeout(15):
                 r = await session.get(url, headers=get_device_list_header)
             if r.status == 200:
-                data = json.loads(await
-                    r.text())['data']['devices']
+                _LOGGER.debug('get_device info',json.loads(await r.text())['data']['devices'])
+                data = json.loads(await r.text())['data']['devices']
 
                 self._device_info = data
                 return True
@@ -230,7 +233,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.warning(e.args[0])
             return False  
     
-    async def _send_find_device_command(self, session):
+    async def _send_find_device_command(self, session:aiohttp.ClientSession):
         flag = True
         for vin in self._device_info:
             imei = vin["imei"]  
@@ -243,7 +246,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             try:
                 with async_timeout.timeout(15):
                     r = await session.post(url, headers=_send_find_device_command_header, data=data)
-                _LOGGER.debug("find_device res: %s", await r.json())
+                _LOGGER.info("find_device res: %s", await r.json())
                 if r.status == 200:
                     flag = True
                 else:
@@ -255,7 +258,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
                 flag = False
         return flag
     
-    async def _send_noise_command(self, session):
+    async def _send_noise_command(self, session:aiohttp.ClientSession):
         flag = True
         imei = self.service_data['imei']  
         url = 'https://i.mi.com/find/device/{}/noise'.format(
@@ -281,7 +284,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             flag = False
         return flag
 
-    async def _send_lost_command(self, session):
+    async def _send_lost_command(self, session:aiohttp.ClientSession):
         flag = True
         imei = self.service_data['imei']  
         content = self.service_data['content']  
@@ -311,7 +314,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
             flag = False
         return flag
 
-    async def _send_clipboard_command(self, session):
+    async def _send_clipboard_command(self, session:aiohttp.ClientSession):
         flag = True
         text = self.service_data['text']  
         url = 'https://i.mi.com/clipboard/lite/text'
@@ -340,7 +343,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
         self.service = data['service']
         await self.async_refresh()
 
-    async def _get_device_location(self, session):
+    async def _get_device_location(self, session:aiohttp.ClientSession):
         devices_info = []
         for vin in self._device_info:
             imei = vin["imei"] 
@@ -354,7 +357,7 @@ class XiaomiCloudDataUpdateCoordinator(DataUpdateCoordinator):
                 with async_timeout.timeout(15):
                     r = await session.get(url, headers=_send_find_device_command_header)
                 if r.status == 200:
-                    _LOGGER.warn("get_device_location_data: %s", json.loads(await r.text()))
+                    _LOGGER.info("get_device_location_data: %s", json.loads(await r.text()))
 
                     if "receipt" in json.loads(await r.text())['data']['location']:
                         gpsInfoTransformed = json.loads(await r.text())['data']['location']['receipt']['gpsInfoTransformed']
